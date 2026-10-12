@@ -1,0 +1,9 @@
+node_modules/
+**/build/
+**/dist/
+**/.gradle/
+**/.cxx/
+.env
+.env.*
+!.env.example
+coverage/

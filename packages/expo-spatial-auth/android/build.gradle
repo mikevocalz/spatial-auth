@@ -1,0 +1,35 @@
+plugins {
+    id 'com.android.library'
+    id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.spatialauth'
+version = '0.1.0'
+
+def safeExtGet = { prop, fallback ->
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+android {
+    namespace "expo.modules.spatialauth"
+    compileSdk safeExtGet('compileSdkVersion', 36)
+    defaultConfig {
+        def metaAppId = project.findProperty("horizonAppId") ?: ""
+        buildConfigField "String", "META_HORIZON_APP_ID", "\"${metaAppId}\""
+        minSdk safeExtGet('minSdkVersion', 24)
+        missingDimensionStrategy "device", "mobile"
+    }
+    buildFeatures { buildConfig true }
+}
+
+dependencies {
+    // Native compilation only. The config plugin adds platform runtime classes
+    // into QUEST builds, never into PICO/mobile.
+    compileOnly "com.meta.horizon.platform.sdk:core-kotlin:0.2.2"
+    compileOnly "com.meta.horizon.platform.sdk:users-kotlin:0.2.2"
+
+    // Credential Manager 1.6.0; Google ID pinned to 1.1.1 for Expo Kotlin 2.2 metadata compatibility.
+    compileOnly "androidx.credentials:credentials:1.6.0"
+    compileOnly "androidx.credentials:credentials-play-services-auth:1.6.0"
+    compileOnly "com.google.android.libraries.identity.googleid:googleid:1.1.1"
+}

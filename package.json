@@ -1,0 +1,24 @@
+{
+  "name": "spatial-auth-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=spatial-auth && npm run build --workspace=expo-spatial-auth",
+    "typecheck": "npm run typecheck --workspace=spatial-auth && npm run typecheck --workspace=expo-spatial-auth",
+    "test": "npm run test --workspace=spatial-auth",
+    "lint": "npm run lint --workspace=spatial-auth && npm run lint --workspace=expo-spatial-auth"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.46.0",
+    "@typescript-eslint/parser": "^8.46.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.8.1"
+  }
+}
