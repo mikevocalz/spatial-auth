@@ -1,4 +1,4 @@
-import { createMergeCoordinator, MergeRejected, type StoredMergeIntent, type MergeTransaction } from '../merge';
+import { createMergeCoordinator, type StoredMergeIntent, type MergeTransaction } from '../merge';
 const now=100000;
 const intent:StoredMergeIntent={id:'intent',targetUserId:'userA',sourceUserId:'userB',
 state:'confirmed',expiresAt:110000,targetReauthenticatedAt:99000,sourceProofVerifiedAt:99500,
