@@ -29,7 +29,7 @@ describe('existing Better Auth user merge',()=>{
   });
   it('rejects stale proof and requires explicit user confirmed intent',async()=>{
     const x=mockStore({sourceProofVerifiedAt:1000});
-    await expect(createMergeCoordinator(x.store,{now:()=>now}).confirm(input)).rejects.toMatchObject({code:'PROOF_STALE'});
+    await expect(createMergeCoordinator(x.store,{now:()=>now,maxProofAgeMs:1000}).confirm(input)).rejects.toMatchObject({code:'PROOF_STALE'});
     expect(x.calls).toEqual([]);
     const y=mockStore({confirmedAt:now+10});
     await expect(createMergeCoordinator(y.store,{now:()=>now}).confirm(input)).rejects.toMatchObject({code:'NOT_CONFIRMED'});
