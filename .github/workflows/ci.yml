@@ -21,5 +21,7 @@ jobs:
         run: npm run typecheck
       - name: Unit tests
         run: npm test
+      - name: Validate independent package boundaries
+        run: node scripts/verify-package-boundaries.mjs
       - name: Lint
         run: npm run lint
