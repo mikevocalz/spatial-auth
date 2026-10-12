@@ -25,6 +25,10 @@
     "./snap": {
       "types": "./build/src/snap.d.ts",
       "default": "./build/src/snap.js"
+    },
+    "./identity-binding": {
+      "types": "./build/src/identity-binding.d.ts",
+      "default": "./build/src/identity-binding.js"
     }
   },
   "scripts": {
