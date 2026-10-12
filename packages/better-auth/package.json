@@ -25,6 +25,10 @@
     "./snap": {
       "types": "./build/src/snap.d.ts",
       "default": "./build/src/snap.js"
+    },
+    "./google": {
+      "types": "./build/src/google.d.ts",
+      "default": "./build/src/google.js"
     }
   },
   "scripts": {
