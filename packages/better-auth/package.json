@@ -1,0 +1,75 @@
+{
+  "name": "spatial-auth",
+  "version": "0.1.0",
+  "description": "Better Auth plugin for verified spatial-platform identities, account linking and XR sessions",
+  "main": "build/src/server.js",
+  "types": "build/src/server.d.ts",
+  "exports": {
+    "./server": {
+      "types": "./build/src/server.d.ts",
+      "default": "./build/src/server.js"
+    },
+    "./pico": {
+      "types": "./build/src/pico.d.ts",
+      "default": "./build/src/pico.js"
+    },
+    "./meta": {
+      "types": "./build/src/meta.d.ts",
+      "default": "./build/src/meta.js"
+    },
+    "./types": {
+      "types": "./build/src/types.d.ts",
+      "default": "./build/src/types.js"
+    },
+    "./package.json": "./package.json",
+    "./snap": {
+      "types": "./build/src/snap.d.ts",
+      "default": "./build/src/snap.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --config jest.config.js",
+    "lint": "eslint src --ext .ts --max-warnings 0",
+    "prepare": "tsc"
+  },
+  "peerDependencies": {
+    "better-auth": ">=1.7.7 <2",
+    "@expo-pico/account": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@expo-pico/account": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@expo-pico/account": "*",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.0.0",
+    "better-auth": "1.7.7",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.9",
+    "typescript": "~6.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikevocalz/spatial-auth.git",
+    "directory": "packages/better-auth"
+  },
+  "files": [
+    "build",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
