@@ -5,5 +5,7 @@ export const getMetaUserProfile = async (): Promise<never> => {
 };
 export const getMetaUserProof = getMetaUserProfile;
 export const getGoogleIdToken = async (_webClientId: string, _nonce: string): Promise<never> => {
+  void _webClientId;
+  void _nonce;
   throw new Error('Use Better Auth Google OAuth on web');
 };
