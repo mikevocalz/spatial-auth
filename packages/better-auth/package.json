@@ -25,6 +25,10 @@
     "./snap": {
       "types": "./build/src/snap.d.ts",
       "default": "./build/src/snap.js"
+    },
+    "./merge": {
+      "types": "./build/src/merge.d.ts",
+      "default": "./build/src/merge.js"
     }
   },
   "scripts": {
