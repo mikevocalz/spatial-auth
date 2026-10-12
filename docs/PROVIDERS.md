@@ -64,6 +64,8 @@ if (!response.authCode) throw new Error("PICO authorization code missing");
 // Send response.authCode to Better Auth Spatial Auth server plugin.
 ```
 
+The standalone package's §getPicoXRProof(picoAccount)§ accepts §@expo-pico/account§ as a host-provided adapter; it is not installed by Spatial Auth itself.
+
 Native platform user ID/profile data are **display-only** until verified by your application's server. Implement `verifyPicoAuthCode` using currently enabled PICO developer services, server-side credentials, official grant/code validation and a verified immutable subject. Different PICO PPS SDK generations use different surfaces; the app's actual configured PPS version governs the exchange. The library does not fabricate an unknown PICO token exchange URL.
 
 If verification cannot be completed with the approved service, PICO linking/sign-in must remain disabled with clear `PROVIDER_NOT_CONFIGURED` errors. Do not "temporarily" compare `openUid` from the headset as a bypass.

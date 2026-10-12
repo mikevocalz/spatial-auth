@@ -47,7 +47,6 @@
     "zod": "^4.1.0"
   },
   "devDependencies": {
-    "@expo-pico/account": "*",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.0.0",
     "better-auth": "1.7.7",

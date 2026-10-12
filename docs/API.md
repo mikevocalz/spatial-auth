@@ -8,7 +8,7 @@
 | --- | --- |
 | `spatial-auth/server` | `spatialAuth(options)` registers spatial sign-in and link endpoints with Better Auth |
 | `spatial-auth/meta` | `getMetaXRProof(...)` proof conversion and `createMetaUserProofVerifier(...)` server helper |
-| `spatial-auth/pico` | `getPicoXRProof(scopes?)` uses existing `@expo-pico/account` auth-code request |
+| `spatial-auth/pico` | `getPicoXRProof(platform, scopes?)` uses existing `@expo-pico/account` auth-code request |
 | `spatial-auth/snap` | `getSnapSpecsProof(ticket)` creates typed handoff proof from a trusted ticket |
 | `spatial-auth/types` | Shared proof and verification types |
 | `expo-spatial-auth` | `getSpatialPlatform`, `getMetaUserProfile`, `getMetaUserProof`, `getGoogleIdToken` |

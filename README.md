@@ -139,8 +139,9 @@ await authClient.$fetch("/spatial-auth/sign-in", {
 
 ```ts
 import { getPicoXRProof } from "spatial-auth/pico";
+import * as picoAccount from "@expo-pico/account";
 
-const proof = await getPicoXRProof();
+const proof = await getPicoXRProof(picoAccount);
 await authClient.$fetch("/spatial-auth/sign-in", {
   method: "POST",
   body: proof
