@@ -25,6 +25,10 @@
     "./snap": {
       "types": "./build/src/snap.d.ts",
       "default": "./build/src/snap.js"
+    },
+    "./pico-server": {
+      "types": "./build/src/pico-server.d.ts",
+      "default": "./build/src/pico-server.js"
     }
   },
   "scripts": {
