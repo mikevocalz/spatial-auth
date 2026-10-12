@@ -1,0 +1,53 @@
+{
+  "name": "expo-spatial-auth",
+  "version": "0.1.0",
+  "description": "Expo Modules v2 native Meta Horizon and Android XR identity adapter",
+  "main": "build/src/index.js",
+  "types": "build/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/src/index.d.ts",
+      "default": "./build/src/index.js"
+    },
+    "./app.plugin": {
+      "default": "./app.plugin.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src plugin --ext .ts --max-warnings 0"
+  },
+  "peerDependencies": {
+    "expo": ">=58.0.2 <59",
+    "react-native": ">=0.88.0-rc.3 <0.89"
+  },
+  "devDependencies": {
+    "expo": "58.0.2",
+    "expo-modules-core": "58.0.11",
+    "react-native": "0.88.0-rc.3",
+    "typescript": "~6.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikevocalz/spatial-auth.git",
+    "directory": "packages/expo-spatial-auth"
+  },
+  "files": [
+    "build",
+    "android",
+    "expo-module.config.json",
+    "app.plugin.js",
+    "README.md"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "dependencies": {
+    "@expo/config-plugins": "58.0.4"
+  }
+}
