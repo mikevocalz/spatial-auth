@@ -40,6 +40,8 @@ export const auth = betterAuth({
   },
   plugins: [
     spatialAuth({
+      // Required: inspect the actual mapped database constraint; see DATABASE-INVARIANTS.md.
+      verifyAccountBindingConstraints: hostAccountConstraintCheck,
       verifyMetaUserProof: createMetaUserProofVerifier({
         appId: process.env.META_APP_ID!,
         appSecret: process.env.META_APP_SECRET!,
@@ -57,7 +59,7 @@ export const auth = betterAuth({
 });
 ```
 
-**Integration note:** `hostPicoVerifier` and `hostSnapTicketConsumer` above are app-owned functions; **not provided** by this repository. Do not enable their providers in production until these functions are implemented and audited.
+**Integration note:** `hostAccountConstraintCheck` must inspect the actual, non-partial unique constraint on the mapped provider/account columns and return true only when it exists. The plugin returns 503 before consuming proof if this check is absent, fails, or the adapter lacks transactions. See [Database invariants](DATABASE-INVARIANTS.md). `hostPicoVerifier` and `hostSnapTicketConsumer` above are app-owned functions; **not provided** by this repository. Do not enable their providers in production until these functions are implemented and audited.
 
 ## 3. Provider evidence types
 
@@ -114,7 +116,7 @@ This response is not evidence of real headset compatibility until actual proof v
 
 ### POST `/spatial-auth/link`
 
-Requires: current authenticated Better Auth session plus new provider proof. With same request body as above, successful response is:
+Requires: an authoritative Better Auth session created less than five minutes ago, plus new provider proof. A shorter host `session.freshAge` is honored; setting it to zero does not disable this limit. The endpoint rechecks the session after proof verification and respects the host’s account-linking and user-validation policies. With same request body as above, successful response is:
 
 ```json
 { "linked": true, "alreadyLinked": false }

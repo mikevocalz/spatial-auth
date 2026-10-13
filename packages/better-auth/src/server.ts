@@ -1,9 +1,10 @@
-import { randomUUID } from 'node:crypto';
-import type { BetterAuthPlugin } from 'better-auth';
-import { APIError, createAuthEndpoint, getSessionFromCtx } from 'better-auth/api';
+import type { BetterAuthPlugin, User, ValidateUserInfoAction } from 'better-auth';
+import { APIError, createAuthEndpoint, formCsrfMiddleware, getAuthoritativeSessionFromCtx } from 'better-auth/api';
 import { setSessionCookie } from 'better-auth/cookies';
 import { z } from 'zod';
 import type { VerifiedXRIdentity, XRVerification } from './types';
+import { createBindingStore, requireBindingDatabase } from './binding-store';
+import { IdentityBindingError, linkVerifiedAccount, resolveVerifiedAccount } from './identity-binding';
 
 const proofSchema = z.discriminatedUnion('provider', [
   z
@@ -59,13 +60,40 @@ async function verify(proof: Proof, options: XRVerification) {
     throw new APIError('UNAUTHORIZED', { message: 'Spatial identity could not be verified' });
   }
   const subject = verified?.subject;
-  if (!subject || !subject.trim() || subject.length > 256) {
+  if (typeof subject !== 'string' || !subject.trim() || subject.length > 256) {
     throw new APIError('UNAUTHORIZED', { message: 'XR platform identity could not be verified' });
   }
   return { providerId: accountKey(proof.provider), accountId: subject, verified };
 }
 
-type AccountOwner = { userId: string };
+type EndpointContext = Parameters<typeof getAuthoritativeSessionFromCtx>[0];
+
+async function requireFreshLinkSession(ctx: EndpointContext) {
+  const current = await getAuthoritativeSessionFromCtx(ctx);
+  if (!current?.user?.id || !current.session) {
+    throw new APIError('UNAUTHORIZED', { message: 'Sign in before connecting a headset account' });
+  }
+  const createdAt = new Date(current.session.createdAt).getTime();
+  const now = Date.now();
+  const hostFreshAge = ctx.context.sessionConfig.freshAge;
+  const maxAgeMs = hostFreshAge > 0 ? Math.min(hostFreshAge * 1000, 300_000) : 300_000;
+  if (!Number.isFinite(hostFreshAge) || hostFreshAge < 0 || !Number.isFinite(createdAt) ||
+      createdAt > now || now - createdAt >= maxAgeMs) {
+    throw new APIError('FORBIDDEN', { code: 'SESSION_NOT_FRESH', message: 'Reauthenticate before connecting a headset account' });
+  }
+  return current;
+}
+
+async function checkUserPolicy(ctx: EndpointContext, user: Partial<User>, action: ValidateUserInfoAction) {
+  const validate = ctx.context.options.user?.validateUserInfo;
+  if (!validate) return;
+  try {
+    const result = await validate({ user, source: { method: 'spatial-auth', action } }, ctx);
+    if (result?.error) throw new Error('User policy rejected');
+  } catch {
+    throw new APIError('FORBIDDEN', { message: 'Spatial identity is not allowed by the application' });
+  }
+}
 
 /**
  * Better Auth plugin for device-bound spatial identities.
@@ -77,6 +105,9 @@ type AccountOwner = { userId: string };
 export function spatialAuth(options: XRVerification) {
   return {
     id: 'spatial-auth',
+    schema: {
+      account: { fields: {}, indexes: [{ fields: ['providerId', 'accountId'], unique: true }] },
+    },
     rateLimit: [
       { pathMatcher: (path) => path === '/spatial-auth/sign-in', window: 60, max: 10 },
       { pathMatcher: (path) => path === '/spatial-auth/link', window: 60, max: 10 },
@@ -84,38 +115,14 @@ export function spatialAuth(options: XRVerification) {
     endpoints: {
       xrSignIn: createAuthEndpoint(
         '/spatial-auth/sign-in',
-        { method: 'POST', body: proofSchema },
+        { method: 'POST', body: proofSchema, use: [formCsrfMiddleware] },
         async (ctx) => {
+          await requireBindingDatabase(ctx.context, options);
           const { providerId, accountId, verified } = await verify(ctx.body, options);
-          const owner = await ctx.context.adapter.findOne<AccountOwner>({
-            model: 'account',
-            where: [
-              { field: 'providerId', value: providerId },
-              { field: 'accountId', value: accountId },
-            ],
-          });
-
-          let user;
-          if (owner) {
-            user = await ctx.context.internalAdapter.findUserById(owner.userId);
-            if (!user) {
-              throw new APIError('INTERNAL_SERVER_ERROR', { message: 'Linked user not found' });
-            }
-          } else {
-            // XR accounts generally do not expose verified email addresses.
-            // The placeholder is deliberately non-deliverable and NEVER email-verified.
-            // An atomic user+account write avoids orphan users after failed provisioning.
-            const created = await ctx.context.internalAdapter.createOAuthUser(
-              {
-                name: verified.name?.trim() || 'Spatial user',
-                email: `xr-${randomUUID()}@accounts.invalid`,
-                emailVerified: false,
-                image: verified.image || null,
-              },
-              { providerId, accountId }
-            );
-            user = created.user;
-          }
+          const { user, created } = await resolveVerifiedAccount(
+            { providerId, accountId }, createBindingStore(ctx.context, verified)
+          );
+          if (!created) await checkUserPolicy(ctx, user, 'sign-in');
 
           const session = await ctx.context.internalAdapter.createSession(user.id);
           if (!session) {
@@ -131,36 +138,30 @@ export function spatialAuth(options: XRVerification) {
         '/spatial-auth/link',
         { method: 'POST', body: proofSchema },
         async (ctx) => {
-          const current = await getSessionFromCtx(ctx, { disableRefresh: true });
-          if (!current?.user?.id) {
-            throw new APIError('UNAUTHORIZED', {
-              message: 'Sign in before connecting a headset account',
-            });
+          const current = await requireFreshLinkSession(ctx);
+          if (ctx.context.options.account?.accountLinking?.enabled === false) {
+            throw new APIError('FORBIDDEN', { message: 'Account linking is disabled by the application' });
           }
-          const { providerId, accountId } = await verify(ctx.body, options);
-          const owner = await ctx.context.adapter.findOne<AccountOwner>({
-            model: 'account',
-            where: [
-              { field: 'providerId', value: providerId },
-              { field: 'accountId', value: accountId },
-            ],
-          });
-          if (owner) {
-            if (owner.userId !== current.user.id) {
+          await requireBindingDatabase(ctx.context, options);
+          const { providerId, accountId, verified } = await verify(ctx.body, options);
+          await checkUserPolicy(ctx, current.user, 'link-account');
+          const fresh = await requireFreshLinkSession(ctx);
+          if (fresh.user.id !== current.user.id || fresh.session.id !== current.session.id) {
+            throw new APIError('UNAUTHORIZED', { message: 'The authenticated session changed during linking' });
+          }
+          try {
+            const result = await linkVerifiedAccount(
+              { providerId, accountId }, current.user.id, createBindingStore(ctx.context, verified)
+            );
+            return ctx.json({ linked: true, alreadyLinked: result === 'already-linked' });
+          } catch (error) {
+            if (error instanceof IdentityBindingError && error.code === 'ACCOUNT_CONFLICT') {
               throw new APIError('CONFLICT', {
-                message:
-                  'This spatial identity belongs to another account. Verify both accounts before requesting a merge.',
+                message: 'This spatial identity belongs to another account. Verify both accounts before requesting a merge.',
               });
             }
-            return ctx.json({ linked: true, alreadyLinked: true });
+            throw error;
           }
-
-          await ctx.context.internalAdapter.linkAccount({
-            userId: current.user.id,
-            providerId,
-            accountId,
-          });
-          return ctx.json({ linked: true, alreadyLinked: false });
         }
       ),
     },
