@@ -1,0 +1,32 @@
+# Combined draft validation
+
+This integration snapshot combines PRs #5–#12 without merging or closing them. [INTEGRATION-SNAPSHOT.json](INTEGRATION-SNAPSHOT.json) records each exact source head and the common base.
+
+## Reconciliation
+
+Source, tests and provider documentation are retained from those heads. The overlapping `packages/better-auth/package.json` edits are combined field by field: all public exports remain available, both database test suites run, and Better Auth plus `@better-auth/core` stay pinned at 1.7.7. The lockfile is the reviewed #5 lockfile; other branches add no dependencies. The contributor guide corrects the device-tool source to `callstack/agent-device`.
+
+The additional public-export tests resolve through this package's own export map. They catch a missing module export or a dropped version pin after branch integration. The boundary script from #12 checks generated entry points and package isolation.
+
+The integration branch also fixes config-plugin regeneration after provider/flavor changes. Expo mod-wrapper tests cover repeated configuration, provider removal, legacy-block migration, preserving unrelated Gradle content and rejecting unsafe or unsupported edits. This follow-up changes the integrated plugin only; the source PRs and their recorded snapshot remain unchanged. The Expo module skill and its config-plugin reference were consulted. No provider credentials, consuming host or native/device validation is implied.
+
+The follow-up passes 86 server unit tests, 47 server integration/export tests and 17 Expo plugin tests (150 total), plus build, typecheck, lint and boundary checks on Node 24. The new regression suite first reproduced five failures on the previous plugin. An actual packed Expo package also resolves through Expo's installed plugin resolver in a separate temporary host using the audited config-plugin dependency. This is package-level evidence, not a full Expo prebuild or Android build.
+
+Run from the repository root:
+
+```sh
+npm test
+npm run build
+npm run typecheck
+npm run lint
+node scripts/verify-package-boundaries.mjs
+```
+
+## Remaining release gates
+
+- The host must apply its reviewed uniqueness migration, implement the actual database constraint check, and validate its database dialect and multi-process concurrency.
+- Connected Accounts requires the new session-snapshot callback and session-bound transport adapters. Server-side last-sign-in-method protection and secure native session persistence remain host responsibilities.
+- The merge coordinator requires verified dual ownership, host-domain policy and locking, actual Better Auth/session-cache fencing, and durable revocation workers. SQLite fixtures do not perform real user-data merges.
+- Meta, PICO, Google and Snap require configured provider services and real device/runtime acceptance. This snapshot adds no provider endpoints or native storage replacement.
+
+Keep this integration PR in draft. Roll back package changes together with their matching host callback contracts; disable spatial endpoints if the host prerequisites are unavailable. No production migration or account mutation is part of this validation.

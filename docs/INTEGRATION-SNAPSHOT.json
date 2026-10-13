@@ -1,0 +1,53 @@
+{
+  "base": "748438f1c850a85cc655ff21b3dcd95721aa3157",
+  "sources": [
+    {
+      "pullRequest": 5,
+      "url": "https://github.com/mikevocalz/spatial-auth/pull/5",
+      "head": "ed00aa234e3dd9727a3e199cd3113203646b216b",
+      "branch": "feat/identity-binding-consistency"
+    },
+    {
+      "pullRequest": 6,
+      "url": "https://github.com/mikevocalz/spatial-auth/pull/6",
+      "head": "3bcdb4dd1b4eea039e967644fff6f47161dfb8ea",
+      "branch": "feat/meta-quest3-verification-hardening"
+    },
+    {
+      "pullRequest": 7,
+      "url": "https://github.com/mikevocalz/spatial-auth/pull/7",
+      "head": "d2068cec4d9687318dfabc2a0e1935ad6b829b96",
+      "branch": "feat/pico-backend-verifier"
+    },
+    {
+      "pullRequest": 8,
+      "url": "https://github.com/mikevocalz/spatial-auth/pull/8",
+      "head": "68867213d34d5c06d5d3498ca4e178ab7c671b5d",
+      "branch": "feat/google-android-xr-linking"
+    },
+    {
+      "pullRequest": 9,
+      "url": "https://github.com/mikevocalz/spatial-auth/pull/9",
+      "head": "4a5117179ca96884cc419d3437f8e445421363aa",
+      "branch": "feat/snap-specs-handoff-verification"
+    },
+    {
+      "pullRequest": 10,
+      "url": "https://github.com/mikevocalz/spatial-auth/pull/10",
+      "head": "7bb5b1289b6ac21aaf90ebfb12bca35a0e9877b6",
+      "branch": "feat/verified-account-merges"
+    },
+    {
+      "pullRequest": 11,
+      "url": "https://github.com/mikevocalz/spatial-auth/pull/11",
+      "head": "afd493315cf2bec6038b8b37bb7199102a55b7dd",
+      "branch": "feat/connected-accounts-controller"
+    },
+    {
+      "pullRequest": 12,
+      "url": "https://github.com/mikevocalz/spatial-auth/pull/12",
+      "head": "61a04c0b5c1437bc42fbf5b407b5066a808a95ea",
+      "branch": "ci/standalone-package-boundary-checks"
+    }
+  ]
+}

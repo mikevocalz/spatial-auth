@@ -105,6 +105,8 @@ export const auth = betterAuth({
   },
   plugins: [
     spatialAuth({
+      // Required: inspect the actual mapped database constraint; see DATABASE-INVARIANTS.md.
+      verifyAccountBindingConstraints: hostAccountConstraintCheck,
       verifyMetaUserProof: createMetaUserProofVerifier({
         appId: process.env.META_APP_ID!,
         appSecret: process.env.META_APP_SECRET!
@@ -120,7 +122,7 @@ export const auth = betterAuth({
 });
 ```
 
-The placeholders `yourVerifiedPicoCodeExchange` and any Snap handoff callback must be implemented by the host app before those providers can be enabled. Do not use `getUserProfile().userId` alone as identity proof.
+The required `hostAccountConstraintCheck` inspects the actual database uniqueness constraint described in [Database invariants](docs/DATABASE-INVARIANTS.md). The adapter must support transactions. The placeholders `yourVerifiedPicoCodeExchange` and any Snap handoff callback must be implemented by the host app before those providers can be enabled. Do not use `getUserProfile().userId` alone as identity proof.
 
 ### Client: sign in on Quest 3
 
