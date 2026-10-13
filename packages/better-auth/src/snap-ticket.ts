@@ -28,7 +28,7 @@ export function createSnapHandoffVerifier(opts: {
 }): (ticket: string) => Promise<VerifiedXRIdentity> {
   const { issuer, projectId, audience, provider, now = Date.now, maximumLifetimeMs = 60000 } = opts;
   if (!issuer?.trim() || !projectId?.trim() || !audience?.trim() ||
-      !provider?.consumeAndVerify || maximumLifetimeMs < 1000 ||
+      !provider?.consumeAndVerify || !Number.isSafeInteger(maximumLifetimeMs) || maximumLifetimeMs < 1000 ||
       maximumLifetimeMs > 300000) throw new Error('Snap handoff verifier is not configured');
   return async (ticket: string) => {
     if (typeof ticket !== 'string' || ticket.trim().length < 24 || ticket.length > 8192) {
@@ -37,7 +37,7 @@ export function createSnapHandoffVerifier(opts: {
     try {
       const claimed = await provider.consumeAndVerify(ticket);
       const timestamp = now();
-      if (!claimed || claimed.consumed !== true ||
+      if (!Number.isFinite(timestamp) || !claimed || claimed.consumed !== true ||
           claimed.issuer !== issuer || claimed.projectId !== projectId ||
           claimed.audience !== audience || !claimed.subject?.trim() ||
           claimed.subject.length > 256 ||
