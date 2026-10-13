@@ -11,6 +11,10 @@ const options = {
 };
 describe('PICO backend verification contract', () => {
   beforeEach(() => options.exchangeAndConsume.mockClear());
+  it.each([NaN, Infinity, -Infinity])('rejects identity when the clock returns %s', async invalid => {
+    await expect(createPicoServerVerifier({ ...options, now: () => invalid })('pico-auth-code'))
+      .rejects.toThrow('PICO identity proof rejected');
+  });
   it('accepts only an attested, consumed code scoped to this app', async () => {
     expect(await createPicoServerVerifier(options)('pico-auth-code')).toEqual({
       subject: 'pico-openuid-001', name: undefined

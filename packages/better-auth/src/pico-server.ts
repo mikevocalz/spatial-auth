@@ -30,10 +30,11 @@ export function createPicoServerVerifier(options: {
     if (!authCode?.trim() || authCode.length > 8192) throw new Error('Invalid PICO authorization code');
     try {
       const result = await exchangeAndConsume({ authCode, expectedAppId });
-      if (!result || result.appId !== expectedAppId ||
+      const timestamp = now();
+      if (!Number.isFinite(timestamp) || !result || result.appId !== expectedAppId ||
           !result.openUid?.trim() || result.openUid.length > 256 ||
           result.codeConsumed !== true || !Number.isFinite(result.expiresAt) ||
-          result.expiresAt <= now()) {
+          result.expiresAt <= timestamp) {
         throw new Error('PICO identity proof rejected');
       }
       return { subject: result.openUid, name: result.displayName };
