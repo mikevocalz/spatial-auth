@@ -34,7 +34,7 @@ export interface MergeTransaction {
   transferAllowedDomainRecords(intent: StoredMergeIntent): Promise<void>;
   /** Reassociate provider accounts under uniqueness constraints. */
   transferVerifiedProviderBindings(intent: StoredMergeIntent): Promise<void>;
-  /** Persist committed state and enqueue outbox revocation (not network IO). */
+  /** Atomically fence source authentication, commit, and queue outbox revocation; no network IO. */
   commitAndQueueSessionRevocation(intent: StoredMergeIntent): Promise<void>;
 }
 export interface MergeStore {
