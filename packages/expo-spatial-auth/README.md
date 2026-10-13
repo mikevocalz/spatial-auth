@@ -11,3 +11,9 @@ Native functions: `getSpatialPlatform()`, `getMetaUserProfile()`, `getMetaUserPr
 See [platform requirements](../../docs/PROVIDERS.md), [configuration](../../README.md), and [device testing](../../docs/TESTING.md). Rebuild the Expo dev client after native changes.
 
 **Status:** staged implementation, Quest 3 and Android XR hardware verification required.
+
+## Config-plugin regeneration
+
+The plugin owns a marked Gradle block. Reapplying it updates the selected provider SDKs and Google flavor; setting both providers to false removes that block. Unrelated Gradle content is preserved. The exact legacy block is migrated automatically. Unrecognized edits or incomplete blocks fail with an actionable error rather than silently retaining old SDKs or deleting custom configuration. Kotlin DSL is not supported; the plugin rejects it when a change is required.
+
+Run `npm test --workspace=expo-spatial-auth` from the repository root for behavioral tests through the installed Expo config-mod wrapper. These tests verify generated text and plugin loading, not Android compilation, APK dependencies or device behavior. The consuming app still owns its flavor definitions and runtime validation.

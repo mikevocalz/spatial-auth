@@ -17,6 +17,7 @@
   "scripts": {
     "build": "tsc",
     "prepare": "tsc",
+    "test": "npm run build && node --test test/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src plugin --ext .ts --max-warnings 0"
   },

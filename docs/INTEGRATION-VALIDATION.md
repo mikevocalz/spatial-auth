@@ -8,6 +8,10 @@ Source, tests and provider documentation are retained from those heads. The over
 
 The additional public-export tests resolve through this package's own export map. They catch a missing module export or a dropped version pin after branch integration. The boundary script from #12 checks generated entry points and package isolation.
 
+The integration branch also fixes config-plugin regeneration after provider/flavor changes. Expo mod-wrapper tests cover repeated configuration, provider removal, legacy-block migration, preserving unrelated Gradle content and rejecting unsafe or unsupported edits. This follow-up changes the integrated plugin only; the source PRs and their recorded snapshot remain unchanged. The Expo module skill and its config-plugin reference were consulted. No provider credentials, consuming host or native/device validation is implied.
+
+The follow-up passes 86 server unit tests, 47 server integration/export tests and 17 Expo plugin tests (150 total), plus build, typecheck, lint and boundary checks on Node 24. The new regression suite first reproduced five failures on the previous plugin. An actual packed Expo package also resolves through Expo's installed plugin resolver in a separate temporary host using the audited config-plugin dependency. This is package-level evidence, not a full Expo prebuild or Android build.
+
 Run from the repository root:
 
 ```sh

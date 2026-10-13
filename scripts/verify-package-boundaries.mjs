@@ -27,7 +27,8 @@ for (const [name, entry] of Object.entries(native.exports)) {
   }
 }
 const plugin=readFileSync(join(root,'packages/expo-spatial-auth/plugin/index.ts'),'utf8');
-assert.match(plugin,/questImplementation.*com\.meta\.horizon/);
+assert.match(plugin,/questImplementation/);
+assert.match(plugin,/com\.meta\.horizon/);
 assert.match(plugin,/mobileImplementation/);
 assert.doesNotMatch(plugin,/picoImplementation/);
 const serverCode=readFileSync(join(root,'packages/better-auth/src/server.ts'),'utf8');
