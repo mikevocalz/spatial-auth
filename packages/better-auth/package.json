@@ -25,17 +25,23 @@
     "./snap": {
       "types": "./build/src/snap.d.ts",
       "default": "./build/src/snap.js"
+    },
+    "./identity-binding": {
+      "types": "./build/src/identity-binding.d.ts",
+      "default": "./build/src/identity-binding.js"
     }
   },
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "jest --config jest.config.js",
+    "test": "npm run test:unit && npm run test:integration",
     "lint": "eslint src --ext .ts --max-warnings 0",
-    "prepare": "tsc"
+    "prepare": "tsc",
+    "test:unit": "jest --config jest.config.js --runInBand",
+    "test:integration": "npm run build && node --test test/*.test.mjs"
   },
   "peerDependencies": {
-    "better-auth": ">=1.7.7 <2",
+    "better-auth": "1.7.7",
     "@expo-pico/account": ">=1.0.0"
   },
   "peerDependenciesMeta": {
@@ -44,7 +50,8 @@
     }
   },
   "dependencies": {
-    "zod": "^4.1.0"
+    "zod": "^4.1.0",
+    "@better-auth/core": "1.7.7"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
