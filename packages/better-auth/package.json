@@ -25,6 +25,10 @@
     "./snap": {
       "types": "./build/src/snap.d.ts",
       "default": "./build/src/snap.js"
+    },
+    "./connected-accounts": {
+      "types": "./build/src/connected-accounts.d.ts",
+      "default": "./build/src/connected-accounts.js"
     }
   },
   "scripts": {
