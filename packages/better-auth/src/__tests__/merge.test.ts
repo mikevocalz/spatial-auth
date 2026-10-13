@@ -16,6 +16,36 @@ function mockStore(patch:Partial<StoredMergeIntent>={}){
   return {calls,tx,store:{withTransaction:async<T>(fn:(x:MergeTransaction)=>Promise<T>):Promise<T>=>fn(tx)}};
 }
 describe('existing Better Auth user merge',()=>{
+  it.each([NaN, Infinity, -Infinity, 999, 1000.5, Number.MAX_SAFE_INTEGER + 1])('rejects an invalid proof-age policy (%s)', invalid => {
+    const x = mockStore();
+    expect(() => createMergeCoordinator(x.store, { maxProofAgeMs: invalid })).toThrow('Invalid merge reauthentication policy');
+    expect(() => createMergeCoordinator(x.store, { maxTargetAuthAgeMs: invalid })).toThrow('Invalid merge reauthentication policy');
+    expect(x.calls).toEqual([]);
+  });
+  it('accepts the minimum proof and reauthentication ages, including the boundary', async () => {
+    const x = mockStore({ sourceProofVerifiedAt: now - 1000 });
+    await expect(createMergeCoordinator(x.store, {
+      now: () => now, maxProofAgeMs: 1000, maxTargetAuthAgeMs: 1000,
+    }).confirm(input)).resolves.toEqual({ status: 'committed', targetUserId: 'userA' });
+    expect(x.calls).toEqual(['eligible', 'domain', 'provider', 'commit-outbox']);
+  });
+  it.each([
+    ['expiresAt', 'EXPIRED'],
+    ['confirmedAt', 'NOT_CONFIRMED'],
+    ['sourceProofVerifiedAt', 'PROOF_STALE'],
+    ['targetReauthenticatedAt', 'PROOF_STALE'],
+  ] as const)('rejects malformed %s before any transfer', async (field, code) => {
+    for (const invalid of [NaN, Infinity, -Infinity]) {
+      const x = mockStore({ [field]: invalid });
+      await expect(createMergeCoordinator(x.store, { now: () => now }).confirm(input)).rejects.toMatchObject({ code });
+      expect(x.calls).toEqual([]);
+    }
+  });
+  it.each([NaN, Infinity, -Infinity])('fails closed when the clock returns %s', async invalid => {
+    const x = mockStore();
+    await expect(createMergeCoordinator(x.store, { now: () => invalid }).confirm(input)).rejects.toMatchObject({ code: 'PROOF_STALE' });
+    expect(x.calls).toEqual([]);
+  });
   it('requires transaction and ordered host domain handlers',async()=>{
     const x=mockStore();
     const out=await createMergeCoordinator(x.store,{now:()=>now}).confirm(input);

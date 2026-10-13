@@ -47,7 +47,8 @@ export function createMergeCoordinator(
   const now=options.now??Date.now;
   const maxProofAgeMs=options.maxProofAgeMs??120000;
   const maxTargetAuthAgeMs=options.maxTargetAuthAgeMs??300000;
-  if(maxProofAgeMs<1000||maxTargetAuthAgeMs<1000) throw new Error('Invalid merge reauthentication policy');
+  if(!Number.isSafeInteger(maxProofAgeMs)||!Number.isSafeInteger(maxTargetAuthAgeMs)||
+     maxProofAgeMs<1000||maxTargetAuthAgeMs<1000) throw new Error('Invalid merge reauthentication policy');
   return {
     /**
      * Must be called on the server with the CURRENT Better Auth session's
@@ -65,9 +66,12 @@ export function createMergeCoordinator(
         if(intent.idempotencyKey!==input.idempotencyKey) throw new MergeRejected('IDEMPOTENCY_CONFLICT');
         if(intent.state==='committed') return {status:'already-committed' as const,targetUserId:intent.targetUserId};
         const timestamp=now();
-        if(intent.expiresAt<=timestamp) throw new MergeRejected('EXPIRED');
-        if(intent.state!=='confirmed'||intent.confirmedAt>timestamp) throw new MergeRejected('NOT_CONFIRMED');
-        if(intent.sourceProofVerifiedAt>timestamp||intent.sourceProofVerifiedAt<timestamp-maxProofAgeMs ||
+        if(!Number.isFinite(timestamp)) throw new MergeRejected('PROOF_STALE');
+        if(!Number.isFinite(intent.expiresAt)||intent.expiresAt<=timestamp) throw new MergeRejected('EXPIRED');
+        if(intent.state!=='confirmed'||!Number.isFinite(intent.confirmedAt)||
+           intent.confirmedAt>timestamp) throw new MergeRejected('NOT_CONFIRMED');
+        if(!Number.isFinite(intent.sourceProofVerifiedAt)||!Number.isFinite(intent.targetReauthenticatedAt)||
+           intent.sourceProofVerifiedAt>timestamp||intent.sourceProofVerifiedAt<timestamp-maxProofAgeMs ||
            intent.targetReauthenticatedAt>timestamp||
            intent.targetReauthenticatedAt<timestamp-maxTargetAuthAgeMs) {
           throw new MergeRejected('PROOF_STALE');
